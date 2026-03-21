@@ -1,0 +1,30 @@
+{
+  "name": "n8n-nodes-ramp",
+  "version": "0.1.0",
+  "description": "n8n community node for the Ramp spend management API — transactions, bills, cards, reimbursements, and webhook triggers",
+  "keywords": ["n8n-community-node-package", "ramp", "spend-management", "accounting", "netsuite"],
+  "license": "MIT",
+  "author": "SolutionLab (solutionlabtech.com)",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && cp nodes/Ramp/ramp.png dist/nodes/Ramp/",
+    "dev": "tsc --watch"
+  },
+  "files": ["dist"],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": ["dist/credentials/RampApi.credentials.js"],
+    "nodes": [
+      "dist/nodes/Ramp/Ramp.node.js",
+      "dist/nodes/Ramp/RampTrigger.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "n8n-workflow": "*"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}
