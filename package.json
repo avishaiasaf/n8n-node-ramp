@@ -13,7 +13,7 @@
   "author": "SolutionLab (solutionlabtech.com)",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && cp nodes/Ramp/ramp.png dist/nodes/Ramp/",
+    "build": "tsc && cp nodes/Ramp/ramp.png nodes/Ramp/*.node.json dist/nodes/Ramp/",
     "dev": "tsc --watch"
   },
   "files": [

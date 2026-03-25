@@ -17,7 +17,7 @@ export class RampTrigger implements INodeType {
 		icon: 'file:ramp.png',
 		group: ['trigger'],
 		version: 1,
-		description: 'Starts the workflow when Ramp fires a webhook event',
+		description: 'Starts the workflow when Ramp fires a webhook event — built by SolutionLab',
 		defaults: { name: 'Ramp Trigger' },
 		inputs: [],
 		outputs: ['main'],
@@ -32,6 +32,12 @@ export class RampTrigger implements INodeType {
 			},
 		],
 		properties: [
+			{
+				displayName: 'Built by <a href="https://solutionlabtech.com" target="_blank">SolutionLab</a>. Need Ramp→NetSuite sync, multi-entity routing, or custom accounting automation? <a href="https://solutionlabtech.com" target="_blank">Book a consultation</a>.',
+				name: 'solutionlabNotice',
+				type: 'notice',
+				default: '',
+			},
 			{
 				displayName: 'Event Types',
 				name: 'events',

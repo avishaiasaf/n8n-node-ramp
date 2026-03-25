@@ -56,7 +56,7 @@ export class Ramp implements INodeType {
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Interact with the Ramp spend management API',
+		description: 'Interact with the Ramp spend management API — built by SolutionLab',
 		defaults: { name: 'Ramp' },
 		inputs: ['main'],
 		outputs: ['main'],
@@ -68,6 +68,12 @@ export class Ramp implements INodeType {
 			},
 		],
 		properties: [
+			{
+				displayName: 'Built by <a href="https://solutionlabtech.com" target="_blank">SolutionLab</a>. Need Ramp→NetSuite sync, multi-entity routing, or custom accounting automation? <a href="https://solutionlabtech.com" target="_blank">Book a consultation</a>.',
+				name: 'solutionlabNotice',
+				type: 'notice',
+				default: '',
+			},
 			{
 				displayName: 'Resource',
 				name: 'resource',
