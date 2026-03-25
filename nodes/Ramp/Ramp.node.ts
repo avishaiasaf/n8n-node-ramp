@@ -461,6 +461,10 @@ export class Ramp implements INodeType {
 							const response = await rampApiRequest(this, 'GET', '/memos', {}, { page_size: limit });
 							responseData = response.data || [];
 						}
+					} else if (operation === 'update') {
+						const memoId = this.getNodeParameter('memoId', i) as string;
+						const memo = this.getNodeParameter('memo', i) as string;
+						responseData = await rampApiRequest(this, 'PATCH', `/memos/${memoId}`, { memo });
 					}
 				}
 

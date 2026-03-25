@@ -22,6 +22,12 @@ export const memoOperations: INodeProperties[] = [
 				description: 'Get many memos',
 				action: 'Get many memos',
 			},
+			{
+				name: 'Update',
+				value: 'update',
+				description: 'Update a memo on a transaction, receipt, or reimbursement',
+				action: 'Update a memo',
+			},
 		],
 		default: 'getAll',
 	},
@@ -35,9 +41,24 @@ export const memoFields: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: {
-			show: { resource: ['memo'], operation: ['get'] },
+			show: { resource: ['memo'], operation: ['get', 'update'] },
 		},
-		description: 'The ID of the memo to retrieve',
+		description: 'The ID of the memo',
+	},
+
+	// ----------------------------------
+	//         memo: update
+	// ----------------------------------
+	{
+		displayName: 'Memo Text',
+		name: 'memo',
+		type: 'string',
+		required: true,
+		default: '',
+		displayOptions: {
+			show: { resource: ['memo'], operation: ['update'] },
+		},
+		description: 'The updated memo text',
 	},
 	{
 		displayName: 'Return All',
