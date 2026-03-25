@@ -22,6 +22,18 @@ export const billOperations: INodeProperties[] = [
 				description: 'Get many bills',
 				action: 'Get many bills',
 			},
+			{
+				name: 'Upload Attachment',
+				value: 'uploadAttachment',
+				description: 'Upload an attachment to a finalized bill',
+				action: 'Upload attachment to a bill',
+			},
+			{
+				name: 'Upload Draft Attachment',
+				value: 'uploadDraftAttachment',
+				description: 'Upload an attachment to a draft bill',
+				action: 'Upload attachment to a draft bill',
+			},
 		],
 		default: 'getAll',
 	},
@@ -38,9 +50,53 @@ export const billFields: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: {
-			show: { resource: ['bill'], operation: ['get'] },
+			show: { resource: ['bill'], operation: ['get', 'uploadAttachment'] },
 		},
-		description: 'The ID of the bill to retrieve',
+		description: 'The ID of the bill',
+	},
+
+	// ----------------------------------
+	//     bill: uploadDraftAttachment
+	// ----------------------------------
+	{
+		displayName: 'Draft Bill ID',
+		name: 'draftBillId',
+		type: 'string',
+		required: true,
+		default: '',
+		displayOptions: {
+			show: { resource: ['bill'], operation: ['uploadDraftAttachment'] },
+		},
+		description: 'The ID of the draft bill',
+	},
+
+	// ----------------------------------
+	//  bill: uploadAttachment / uploadDraftAttachment
+	// ----------------------------------
+	{
+		displayName: 'Binary Property',
+		name: 'binaryPropertyName',
+		type: 'string',
+		required: true,
+		default: 'data',
+		displayOptions: {
+			show: { resource: ['bill'], operation: ['uploadAttachment', 'uploadDraftAttachment'] },
+		},
+		description: 'Name of the binary property containing the file to upload',
+	},
+	{
+		displayName: 'Attachment Type',
+		name: 'attachmentType',
+		type: 'options',
+		options: [
+			{ name: 'Invoice', value: 'INVOICE' },
+			{ name: 'Other', value: 'OTHER' },
+		],
+		default: 'INVOICE',
+		displayOptions: {
+			show: { resource: ['bill'], operation: ['uploadAttachment', 'uploadDraftAttachment'] },
+		},
+		description: 'The type of attachment. Note: only one INVOICE attachment is allowed per bill.',
 	},
 
 	// ----------------------------------

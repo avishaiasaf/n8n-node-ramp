@@ -9,7 +9,7 @@ import {
 	NodeApiError,
 } from 'n8n-workflow';
 
-import { getBaseUrl, rampApiRequest, rampApiRequestAllItems } from './RampApi';
+import { getBaseUrl, rampApiRequest, rampApiRequestAllItems, rampApiUploadFile } from './RampApi';
 
 import {
 	transactionOperations,
@@ -28,6 +28,24 @@ import {
 	entityFields,
 	webhookOperations,
 	webhookFields,
+	receiptOperations,
+	receiptFields,
+	departmentOperations,
+	departmentFields,
+	locationOperations,
+	locationFields,
+	vendorOperations,
+	vendorFields,
+	merchantOperations,
+	merchantFields,
+	memoOperations,
+	memoFields,
+	limitOperations,
+	limitFields,
+	cashbackOperations,
+	cashbackFields,
+	transferOperations,
+	transferFields,
 } from './descriptions';
 
 export class Ramp implements INodeType {
@@ -59,10 +77,19 @@ export class Ramp implements INodeType {
 					{ name: 'Bill', value: 'bill' },
 					{ name: 'Business', value: 'business' },
 					{ name: 'Card', value: 'card' },
+					{ name: 'Cashback', value: 'cashback' },
+					{ name: 'Department', value: 'department' },
 					{ name: 'Entity', value: 'entity' },
+					{ name: 'Limit', value: 'limit' },
+					{ name: 'Location', value: 'location' },
+					{ name: 'Memo', value: 'memo' },
+					{ name: 'Merchant', value: 'merchant' },
+					{ name: 'Receipt', value: 'receipt' },
 					{ name: 'Reimbursement', value: 'reimbursement' },
 					{ name: 'Transaction', value: 'transaction' },
+					{ name: 'Transfer', value: 'transfer' },
 					{ name: 'User', value: 'user' },
+					{ name: 'Vendor', value: 'vendor' },
 					{ name: 'Webhook', value: 'webhook' },
 				],
 				default: 'transaction',
@@ -83,6 +110,24 @@ export class Ramp implements INodeType {
 			...entityFields,
 			...webhookOperations,
 			...webhookFields,
+			...receiptOperations,
+			...receiptFields,
+			...departmentOperations,
+			...departmentFields,
+			...locationOperations,
+			...locationFields,
+			...vendorOperations,
+			...vendorFields,
+			...merchantOperations,
+			...merchantFields,
+			...memoOperations,
+			...memoFields,
+			...limitOperations,
+			...limitFields,
+			...cashbackOperations,
+			...cashbackFields,
+			...transferOperations,
+			...transferFields,
 		],
 	};
 
@@ -105,7 +150,7 @@ export class Ramp implements INodeType {
 						},
 						form: {
 							grant_type: 'client_credentials',
-							scope: 'business:read transactions:read bills:read bills:write accounting:write webhooks:write entities:read accounting:read receipts:read',
+							scope: 'business:read transactions:read bills:read bills:write accounting:write webhooks:write entities:read accounting:read receipts:read departments:read locations:read merchants:read limits:read transfers:read cashbacks:read memos:read',
 						},
 						json: true,
 					});
@@ -117,7 +162,6 @@ export class Ramp implements INodeType {
 						};
 					}
 
-					// Verify the token works by calling a lightweight endpoint
 					await this.helpers.request({
 						method: 'GET',
 						url: `${baseUrl}/developer/v1/business`,
@@ -244,6 +288,28 @@ export class Ramp implements INodeType {
 							const response = await rampApiRequest(this, 'GET', '/bills', {}, qs);
 							responseData = response.data || [];
 						}
+					} else if (operation === 'uploadAttachment') {
+						const billId = this.getNodeParameter('billId', i) as string;
+						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
+						const attachmentType = this.getNodeParameter('attachmentType', i) as string;
+						responseData = await rampApiUploadFile(
+							this,
+							`/bills/${billId}/attachments`,
+							binaryPropertyName,
+							i,
+							{ attachment_type: attachmentType },
+						);
+					} else if (operation === 'uploadDraftAttachment') {
+						const draftBillId = this.getNodeParameter('draftBillId', i) as string;
+						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
+						const attachmentType = this.getNodeParameter('attachmentType', i) as string;
+						responseData = await rampApiUploadFile(
+							this,
+							`/bills/drafts/${draftBillId}/attachments`,
+							binaryPropertyName,
+							i,
+							{ attachment_type: attachmentType },
+						);
 					}
 				}
 
@@ -279,6 +345,173 @@ export class Ramp implements INodeType {
 					if (operation === 'get') {
 						const entityId = this.getNodeParameter('entityId', i) as string;
 						responseData = await rampApiRequest(this, 'GET', `/entities/${entityId}`);
+					}
+				}
+
+				// ── Receipt ──────────────────────────────────────────────
+				else if (resource === 'receipt') {
+					if (operation === 'get') {
+						const receiptId = this.getNodeParameter('receiptId', i) as string;
+						responseData = await rampApiRequest(this, 'GET', `/receipts/${receiptId}`);
+					} else if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const filters = this.getNodeParameter('filters', i) as Record<string, any>;
+						const qs: Record<string, string | number | boolean> = {};
+
+						if (filters.user_id) qs.user_id = filters.user_id;
+						if (filters.transaction_id) qs.transaction_id = filters.transaction_id;
+						if (filters.from_date) qs.from_date = filters.from_date;
+						if (filters.to_date) qs.to_date = filters.to_date;
+
+						if (returnAll) {
+							responseData = await rampApiRequestAllItems(this, '/receipts', qs);
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							qs.page_size = limit;
+							const response = await rampApiRequest(this, 'GET', '/receipts', {}, qs);
+							responseData = response.data || [];
+						}
+					}
+				}
+
+				// ── Department ───────────────────────────────────────────
+				else if (resource === 'department') {
+					if (operation === 'get') {
+						const departmentId = this.getNodeParameter('departmentId', i) as string;
+						responseData = await rampApiRequest(this, 'GET', `/departments/${departmentId}`);
+					} else if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+						if (returnAll) {
+							responseData = await rampApiRequestAllItems(this, '/departments');
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const response = await rampApiRequest(this, 'GET', '/departments', {}, { page_size: limit });
+							responseData = response.data || [];
+						}
+					}
+				}
+
+				// ── Location ─────────────────────────────────────────────
+				else if (resource === 'location') {
+					if (operation === 'get') {
+						const locationId = this.getNodeParameter('locationId', i) as string;
+						responseData = await rampApiRequest(this, 'GET', `/locations/${locationId}`);
+					} else if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+						if (returnAll) {
+							responseData = await rampApiRequestAllItems(this, '/locations');
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const response = await rampApiRequest(this, 'GET', '/locations', {}, { page_size: limit });
+							responseData = response.data || [];
+						}
+					}
+				}
+
+				// ── Vendor (Accounting) ──────────────────────────────────
+				else if (resource === 'vendor') {
+					if (operation === 'get') {
+						const vendorId = this.getNodeParameter('vendorId', i) as string;
+						responseData = await rampApiRequest(this, 'GET', `/accounting/vendors/${vendorId}`);
+					} else if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+						if (returnAll) {
+							responseData = await rampApiRequestAllItems(this, '/accounting/vendors');
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const response = await rampApiRequest(this, 'GET', '/accounting/vendors', {}, { page_size: limit });
+							responseData = response.data || [];
+						}
+					}
+				}
+
+				// ── Merchant ─────────────────────────────────────────────
+				else if (resource === 'merchant') {
+					if (operation === 'get') {
+						const merchantId = this.getNodeParameter('merchantId', i) as string;
+						responseData = await rampApiRequest(this, 'GET', `/merchants/${merchantId}`);
+					} else if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+						if (returnAll) {
+							responseData = await rampApiRequestAllItems(this, '/merchants');
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const response = await rampApiRequest(this, 'GET', '/merchants', {}, { page_size: limit });
+							responseData = response.data || [];
+						}
+					}
+				}
+
+				// ── Memo ─────────────────────────────────────────────────
+				else if (resource === 'memo') {
+					if (operation === 'get') {
+						const memoId = this.getNodeParameter('memoId', i) as string;
+						responseData = await rampApiRequest(this, 'GET', `/memos/${memoId}`);
+					} else if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+						if (returnAll) {
+							responseData = await rampApiRequestAllItems(this, '/memos');
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const response = await rampApiRequest(this, 'GET', '/memos', {}, { page_size: limit });
+							responseData = response.data || [];
+						}
+					}
+				}
+
+				// ── Limit ────────────────────────────────────────────────
+				else if (resource === 'limit') {
+					if (operation === 'get') {
+						const limitId = this.getNodeParameter('limitId', i) as string;
+						responseData = await rampApiRequest(this, 'GET', `/limits/${limitId}`);
+					} else if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+						if (returnAll) {
+							responseData = await rampApiRequestAllItems(this, '/limits');
+						} else {
+							const limitValue = this.getNodeParameter('limit', i) as number;
+							const response = await rampApiRequest(this, 'GET', '/limits', {}, { page_size: limitValue });
+							responseData = response.data || [];
+						}
+					}
+				}
+
+				// ── Cashback ─────────────────────────────────────────────
+				else if (resource === 'cashback') {
+					if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+						if (returnAll) {
+							responseData = await rampApiRequestAllItems(this, '/cashbacks');
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const response = await rampApiRequest(this, 'GET', '/cashbacks', {}, { page_size: limit });
+							responseData = response.data || [];
+						}
+					}
+				}
+
+				// ── Transfer ─────────────────────────────────────────────
+				else if (resource === 'transfer') {
+					if (operation === 'get') {
+						const transferId = this.getNodeParameter('transferId', i) as string;
+						responseData = await rampApiRequest(this, 'GET', `/transfers/${transferId}`);
+					} else if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+						if (returnAll) {
+							responseData = await rampApiRequestAllItems(this, '/transfers');
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const response = await rampApiRequest(this, 'GET', '/transfers', {}, { page_size: limit });
+							responseData = response.data || [];
+						}
 					}
 				}
 

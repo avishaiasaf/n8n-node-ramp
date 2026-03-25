@@ -28,6 +28,7 @@ export class RampTrigger implements INodeType {
 				httpMethod: 'POST',
 				responseMode: 'onReceived',
 				path: 'ramp',
+				isFullPath: false,
 			},
 		],
 		properties: [
@@ -110,6 +111,7 @@ export class RampTrigger implements INodeType {
 	};
 
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
+		const req = this.getRequestObject();
 		const body = this.getBodyData() as Record<string, any>;
 		const webhookData = this.getWorkflowStaticData('node');
 

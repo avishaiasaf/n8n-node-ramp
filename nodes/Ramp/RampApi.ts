@@ -35,7 +35,7 @@ export async function getAccessToken(
 		form: {
 			grant_type: 'client_credentials',
 			scope:
-				'business:read transactions:read bills:read bills:write accounting:write webhooks:write entities:read accounting:read receipts:read',
+				'business:read transactions:read bills:read bills:write accounting:write webhooks:write entities:read accounting:read receipts:read departments:read locations:read merchants:read limits:read transfers:read cashbacks:read memos:read',
 		},
 		json: true,
 	});
@@ -120,6 +120,61 @@ export async function rampApiRequestAllItems(
 	} while (cursor);
 
 	return allItems;
+}
+
+/**
+ * Upload a file to the Ramp API using multipart/form-data.
+ * Used for bill attachment uploads.
+ */
+export async function rampApiUploadFile(
+	context: IExecuteFunctions,
+	endpoint: string,
+	binaryPropertyName: string,
+	itemIndex: number,
+	additionalFields: Record<string, string> = {},
+): Promise<any> {
+	const credentials = await context.getCredentials('rampApi');
+	const baseUrl = getBaseUrl(credentials.environment as string);
+	const token = await getAccessToken(context);
+
+	const binaryData = context.helpers.assertBinaryData(itemIndex, binaryPropertyName);
+	const dataBuffer = await context.helpers.getBinaryDataBuffer(itemIndex, binaryPropertyName);
+
+	const formData: Record<string, any> = {
+		file: {
+			value: dataBuffer,
+			options: {
+				filename: binaryData.fileName || 'attachment',
+				contentType: binaryData.mimeType || 'application/octet-stream',
+			},
+		},
+		...additionalFields,
+	};
+
+	const options: any = {
+		method: 'POST',
+		url: `${baseUrl}/developer/v1${endpoint}`,
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+		formData,
+		json: true,
+	};
+
+	const maxRetries = 3;
+	for (let attempt = 0; attempt <= maxRetries; attempt++) {
+		try {
+			return await context.helpers.request(options);
+		} catch (error: any) {
+			const statusCode = error.statusCode || error.httpCode;
+			if (statusCode === 429 && attempt < maxRetries) {
+				const delay = Math.pow(2, attempt) * 1000;
+				await new Promise((resolve) => setTimeout(resolve, delay));
+				continue;
+			}
+			throw new NodeApiError(context.getNode(), error as any);
+		}
+	}
 }
 
 /**
