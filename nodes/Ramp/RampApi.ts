@@ -35,7 +35,7 @@ export async function getAccessToken(
 		form: {
 			grant_type: 'client_credentials',
 			scope:
-				'transactions:read bills:read bills:write accounting:write webhooks:write entities:read accounting:read receipts:read',
+				'business:read transactions:read bills:read bills:write accounting:write webhooks:write entities:read accounting:read receipts:read',
 		},
 		json: true,
 	});

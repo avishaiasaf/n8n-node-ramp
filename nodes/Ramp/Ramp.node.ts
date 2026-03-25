@@ -105,7 +105,7 @@ export class Ramp implements INodeType {
 						},
 						form: {
 							grant_type: 'client_credentials',
-							scope: 'transactions:read bills:read bills:write accounting:write webhooks:write entities:read accounting:read receipts:read',
+							scope: 'business:read transactions:read bills:read bills:write accounting:write webhooks:write entities:read accounting:read receipts:read',
 						},
 						json: true,
 					});

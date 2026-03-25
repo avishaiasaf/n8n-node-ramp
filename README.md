@@ -32,8 +32,9 @@ npm install n8n-nodes-ramp
 When creating your Ramp app, include these scopes:
 
 ```
-transactions:read  bills:read  bills:write  accounting:write
-webhooks:write  entities:read  accounting:read  receipts:read
+business:read  transactions:read  bills:read  bills:write
+accounting:write  webhooks:write  entities:read  accounting:read
+receipts:read
 ```
 
 ### Environment Note
