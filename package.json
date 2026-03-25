@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-ramp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "n8n community node for the Ramp spend management API — transactions, bills, cards, reimbursements, and webhook triggers",
   "keywords": [
     "n8n-community-node-package",
